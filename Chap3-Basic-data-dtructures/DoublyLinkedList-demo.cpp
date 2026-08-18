@@ -7,6 +7,9 @@ using namespace std;
 // them sau node, them truoc node, tim kiem, sua,
 // xoa dau, xoa cuoi, xoa theo gia tri, duyet 2 chieu,
 // xoa toan bo.
+//
+// Su dung struct DoublyLinkedList de quan ly head va tail,
+// giup viec truyen tham so de dang hon.
 // ============================================================
 
 struct Node
@@ -16,13 +19,20 @@ struct Node
     Node *previous;
 };
 
+// Quan ly danh sach lien ket kep
+struct DoublyLinkedList
+{
+    Node *head;
+    Node *tail;
+};
+
 // ------------------------------------------------------------
 // 1. Khoi tao
 // ------------------------------------------------------------
-void init(Node *&head, Node *&tail)
+void init(DoublyLinkedList &l)
 {
-    head = nullptr;
-    tail = nullptr;
+    l.head = nullptr;
+    l.tail = nullptr;
 }
 
 // ------------------------------------------------------------
@@ -42,9 +52,9 @@ Node* createNode(int x)
 // ------------------------------------------------------------
 // 3. Duyet tu dau den cuoi
 // ------------------------------------------------------------
-void outputForward(Node *head)
+void outputForward(const DoublyLinkedList &l)
 {
-    Node *p = head;
+    Node *p = l.head;
 
     while (p != nullptr)
     {
@@ -58,9 +68,9 @@ void outputForward(Node *head)
 // ------------------------------------------------------------
 // 4. Duyet tu cuoi ve dau
 // ------------------------------------------------------------
-void outputBackward(Node *tail)
+void outputBackward(const DoublyLinkedList &l)
 {
-    Node *p = tail;
+    Node *p = l.tail;
 
     while (p != nullptr)
     {
@@ -74,11 +84,11 @@ void outputBackward(Node *tail)
 // ------------------------------------------------------------
 // 5. Dem so Node
 // ------------------------------------------------------------
-int countNode(Node *head)
+int countNode(const DoublyLinkedList &l)
 {
     int count = 0;
 
-    for (Node *p = head; p != nullptr; p = p->next)
+    for (Node *p = l.head; p != nullptr; p = p->next)
         count++;
 
     return count;
@@ -87,9 +97,9 @@ int countNode(Node *head)
 // ------------------------------------------------------------
 // 6. Tim Node co gia tri x
 // ------------------------------------------------------------
-Node* search(Node *head, int x)
+Node* search(const DoublyLinkedList &l, int x)
 {
-    Node *p = head;
+    Node *p = l.head;
 
     while (p != nullptr && p->info != x)
         p = p->next;
@@ -100,51 +110,51 @@ Node* search(Node *head, int x)
 // ------------------------------------------------------------
 // 7. Them vao dau
 // ------------------------------------------------------------
-void addHead(Node *&head, Node *&tail, int x)
+void addHead(DoublyLinkedList &l, int x)
 {
     Node *p = createNode(x);
 
-    p->next = head;
+    p->next = l.head;
 
-    if (head != nullptr)
-        head->previous = p;
+    if (l.head != nullptr)
+        l.head->previous = p;
     else
-        tail = p;
+        l.tail = p;
 
-    head = p;
+    l.head = p;
 }
 
 // ------------------------------------------------------------
 // 8. Them vao cuoi
 // ------------------------------------------------------------
-void addTail(Node *&head, Node *&tail, int x)
+void addTail(DoublyLinkedList &l, int x)
 {
     Node *p = createNode(x);
 
-    p->previous = tail;
+    p->previous = l.tail;
 
-    if (tail != nullptr)
-        tail->next = p;
+    if (l.tail != nullptr)
+        l.tail->next = p;
     else
-        head = p;
+        l.head = p;
 
-    tail = p;
+    l.tail = p;
 }
 
 // ------------------------------------------------------------
 // 9. Them sau Node co gia tri value
 // ------------------------------------------------------------
-bool addAfter(Node *&head, Node *&tail, int x, int value)
+bool addAfter(DoublyLinkedList &l, int x, int value)
 {
-    Node *q = search(head, value);
+    Node *q = search(l, value);
 
     if (q == nullptr)
         return false;
 
     // Them sau tail
-    if (q == tail)
+    if (q == l.tail)
     {
-        addTail(head, tail, x);
+        addTail(l, x);
         return true;
     }
 
@@ -162,17 +172,17 @@ bool addAfter(Node *&head, Node *&tail, int x, int value)
 // ------------------------------------------------------------
 // 10. Them truoc Node co gia tri value
 // ------------------------------------------------------------
-bool addBefore(Node *&head, Node *&tail, int x, int value)
+bool addBefore(DoublyLinkedList &l, int x, int value)
 {
-    Node *q = search(head, value);
+    Node *q = search(l, value);
 
     if (q == nullptr)
         return false;
 
     // Them truoc head
-    if (q == head)
+    if (q == l.head)
     {
-        addHead(head, tail, x);
+        addHead(l, x);
         return true;
     }
 
@@ -190,9 +200,9 @@ bool addBefore(Node *&head, Node *&tail, int x, int value)
 // ------------------------------------------------------------
 // 11. Sua Node co gia tri cu thanh gia tri moi
 // ------------------------------------------------------------
-bool update(Node *head, int oldValue, int newValue)
+bool update(const DoublyLinkedList &l, int oldValue, int newValue)
 {
-    Node *p = search(head, oldValue);
+    Node *p = search(l, oldValue);
 
     if (p == nullptr)
         return false;
@@ -204,19 +214,19 @@ bool update(Node *head, int oldValue, int newValue)
 // ------------------------------------------------------------
 // 12. Xoa dau
 // ------------------------------------------------------------
-bool deleteHead(Node *&head, Node *&tail)
+bool deleteHead(DoublyLinkedList &l)
 {
-    if (head == nullptr)
+    if (l.head == nullptr)
         return false;
 
-    Node *p = head;
+    Node *p = l.head;
 
-    head = head->next;
+    l.head = l.head->next;
 
-    if (head != nullptr)
-        head->previous = nullptr;
+    if (l.head != nullptr)
+        l.head->previous = nullptr;
     else
-        tail = nullptr;
+        l.tail = nullptr;
 
     delete p;
     return true;
@@ -225,19 +235,19 @@ bool deleteHead(Node *&head, Node *&tail)
 // ------------------------------------------------------------
 // 13. Xoa cuoi
 // ------------------------------------------------------------
-bool deleteTail(Node *&head, Node *&tail)
+bool deleteTail(DoublyLinkedList &l)
 {
-    if (tail == nullptr)
+    if (l.tail == nullptr)
         return false;
 
-    Node *p = tail;
+    Node *p = l.tail;
 
-    tail = tail->previous;
+    l.tail = l.tail->previous;
 
-    if (tail != nullptr)
-        tail->next = nullptr;
+    if (l.tail != nullptr)
+        l.tail->next = nullptr;
     else
-        head = nullptr;
+        l.head = nullptr;
 
     delete p;
     return true;
@@ -246,18 +256,18 @@ bool deleteTail(Node *&head, Node *&tail)
 // ------------------------------------------------------------
 // 14. Xoa Node dau tien co gia tri x
 // ------------------------------------------------------------
-bool deleteX(Node *&head, Node *&tail, int x)
+bool deleteX(DoublyLinkedList &l, int x)
 {
-    Node *q = search(head, x);
+    Node *q = search(l, x);
 
     if (q == nullptr)
         return false;
 
-    if (q == head)
-        return deleteHead(head, tail);
+    if (q == l.head)
+        return deleteHead(l);
 
-    if (q == tail)
-        return deleteTail(head, tail);
+    if (q == l.tail)
+        return deleteTail(l);
 
     q->previous->next = q->next;
     q->next->previous = q->previous;
@@ -270,10 +280,10 @@ bool deleteX(Node *&head, Node *&tail, int x)
 // ------------------------------------------------------------
 // 15. Xoa tat ca Node co gia tri x
 // ------------------------------------------------------------
-int deleteAllX(Node *&head, Node *&tail, int x)
+int deleteAllX(DoublyLinkedList &l, int x)
 {
     int count = 0;
-    Node *p = head;
+    Node *p = l.head;
 
     while (p != nullptr)
     {
@@ -281,10 +291,10 @@ int deleteAllX(Node *&head, Node *&tail, int x)
 
         if (p->info == x)
         {
-            if (p == head)
-                deleteHead(head, tail);
-            else if (p == tail)
-                deleteTail(head, tail);
+            if (p == l.head)
+                deleteHead(l);
+            else if (p == l.tail)
+                deleteTail(l);
             else
             {
                 p->previous->next = p->next;
@@ -304,10 +314,10 @@ int deleteAllX(Node *&head, Node *&tail, int x)
 // ------------------------------------------------------------
 // 16. Xoa toan bo danh sach
 // ------------------------------------------------------------
-void clear(Node *&head, Node *&tail)
+void clear(DoublyLinkedList &l)
 {
-    while (head != nullptr)
-        deleteHead(head, tail);
+    while (l.head != nullptr)
+        deleteHead(l);
 }
 
 // ============================================================
@@ -316,57 +326,57 @@ void clear(Node *&head, Node *&tail)
 
 int main()
 {
-    Node *head, *tail;
-    init(head, tail);
+    DoublyLinkedList l;
+    init(l);
 
     // Tao danh sach
-    addTail(head, tail, 10);
-    addTail(head, tail, 20);
-    addTail(head, tail, 30);
-    addTail(head, tail, 40);
+    addTail(l, 10);
+    addTail(l, 20);
+    addTail(l, 30);
+    addTail(l, 40);
 
     cout << "Duyet tu dau: ";
-    outputForward(head);
+    outputForward(l);
 
     cout << "Duyet tu cuoi: ";
-    outputBackward(tail);
+    outputBackward(l);
 
     // Them dau/cuoi
-    addHead(head, tail, 5);
-    addTail(head, tail, 50);
+    addHead(l, 5);
+    addTail(l, 50);
 
     // Them truoc/sau
-    addAfter(head, tail, 25, 20);
-    addBefore(head, tail, 15, 20);
+    addAfter(l, 25, 20);
+    addBefore(l, 15, 20);
 
     // Sua
-    update(head, 30, 35);
+    update(l, 30, 35);
 
     cout << "Sau them/sua: ";
-    outputForward(head);
+    outputForward(l);
 
     // Tim kiem
-    Node *p = search(head, 25);
+    Node *p = search(l, 25);
     if (p != nullptr)
         cout << "Tim thay: " << p->info << endl;
 
     // Xoa dau/cuoi
-    deleteHead(head, tail);
-    deleteTail(head, tail);
+    deleteHead(l);
+    deleteTail(l);
 
     // Xoa theo gia tri
-    deleteX(head, tail, 25);
+    deleteX(l, 25);
 
     cout << "Sau khi xoa: ";
-    outputForward(head);
+    outputForward(l);
 
-    cout << "So Node: " << countNode(head) << endl;
+    cout << "So Node: " << countNode(l) << endl;
 
     // Xoa toan bo
-    clear(head, tail);
+    clear(l);
 
     cout << "Sau clear: ";
-    outputForward(head);
+    outputForward(l);
 
     return 0;
 }

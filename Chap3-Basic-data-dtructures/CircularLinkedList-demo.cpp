@@ -2,23 +2,14 @@
 using namespace std;
 
 // ============================================================
-// DEMO: DANH SACH LIEN KET VONG DON
+// DEMO: DANH SACH LIEN KET VONG (DSLK don vong)
+// Dac diem: node cuoi tro ve node dau (tail->next = head)
+// Cac thao tac: khoi tao, tao node, them dau, them cuoi,
+// them sau node, tim kiem, sua, xoa dau, xoa cuoi,
+// xoa theo gia tri, duyet, xoa toan bo.
 //
-// Cac thao tac:
-// 1. Khoi tao
-// 2. Tao Node
-// 3. Duyet
-// 4. Dem Node
-// 5. Tim kiem
-// 6. Them dau
-// 7. Them cuoi
-// 8. Them sau Node
-// 9. Sua Node
-// 10. Xoa dau
-// 11. Xoa cuoi
-// 12. Xoa Node dau tien co gia tri x
-// 13. Xoa tat ca Node co gia tri x
-// 14. Xoa toan bo danh sach
+// Su dung struct CircularLinkedList de quan ly head va tail,
+// giup viec truyen tham so de dang hon.
 // ============================================================
 
 struct Node
@@ -27,86 +18,84 @@ struct Node
     Node *next;
 };
 
-// ============================================================
-// 1. KHOI TAO
-// ============================================================
-
-void init(Node *&head, Node *&tail)
+// Quan ly danh sach lien ket vong
+struct CircularLinkedList
 {
-    head = nullptr;
-    tail = nullptr;
+    Node *head;
+    Node *tail;
+};
+
+// ------------------------------------------------------------
+// 1. Khoi tao
+// ------------------------------------------------------------
+void init(CircularLinkedList &l)
+{
+    l.head = nullptr;
+    l.tail = nullptr;
 }
 
-// ============================================================
-// 2. TAO NODE
-// ============================================================
-
+// ------------------------------------------------------------
+// 2. Tao Node
+// ------------------------------------------------------------
 Node* createNode(int x)
 {
     Node *p = new Node;
-
     p->info = x;
     p->next = nullptr;
-
     return p;
 }
 
-// ============================================================
-// 3. DUYET DANH SACH
-// ============================================================
-
-void output(Node *head)
+// ------------------------------------------------------------
+// 3. Duyet danh sach (di tu head den khi quay lai head)
+// ------------------------------------------------------------
+void output(const CircularLinkedList &l)
 {
-    if (head == nullptr)
+    if (l.head == nullptr)
     {
-        cout << "Danh sach rong!\n";
+        cout << endl;
         return;
     }
 
-    Node *p = head;
+    Node *p = l.head;
 
     do
     {
         cout << p->info << " ";
         p = p->next;
-    }
-    while (p != head);
+    } while (p != l.head);
 
     cout << endl;
 }
 
-// ============================================================
-// 4. DEM SO NODE
-// ============================================================
-
-int countNode(Node *head)
+// ------------------------------------------------------------
+// 4. Dem so Node
+// ------------------------------------------------------------
+int countNode(const CircularLinkedList &l)
 {
-    if (head == nullptr)
+    if (l.head == nullptr)
         return 0;
 
     int count = 0;
-    Node *p = head;
+    Node *p = l.head;
 
     do
     {
         count++;
         p = p->next;
-    }
-    while (p != head);
+    } while (p != l.head);
 
     return count;
 }
 
-// ============================================================
-// 5. TIM NODE CO GIA TRI X
-// ============================================================
-
-Node* search(Node *head, int x)
+// ------------------------------------------------------------
+// 5. Tim Node co gia tri x
+// ------------------------------------------------------------
+Node* search(const CircularLinkedList &l, int x)
 {
-    if (head == nullptr)
+    if (l.head == nullptr)
         return nullptr;
 
-    Node *p = head;
+    Node *p = l.head;
 
     do
     {
@@ -114,63 +103,59 @@ Node* search(Node *head, int x)
             return p;
 
         p = p->next;
-    }
-    while (p != head);
+    } while (p != l.head);
 
     return nullptr;
 }
 
-// ============================================================
-// 6. THEM VAO DAU
-// ============================================================
-
-void addHead(Node *&head, Node *&tail, int x)
+// ------------------------------------------------------------
+// 6. Them vao dau
+// ------------------------------------------------------------
+void addHead(CircularLinkedList &l, int x)
 {
     Node *p = createNode(x);
 
     // Danh sach rong
-    if (head == nullptr)
+    if (l.head == nullptr)
     {
-        head = tail = p;
-        p->next = head;
+        l.head = p;
+        l.tail = p;
+        p->next = p;            // tu tro vao chinh no
         return;
     }
 
-    p->next = head;
-    head = p;
-
-    // Giữ lien ket vong
-    tail->next = head;
+    p->next = l.head;
+    l.tail->next = p;
+    l.head = p;
 }
 
-// ============================================================
-// 7. THEM VAO CUOI
-// ============================================================
-
-void addTail(Node *&head, Node *&tail, int x)
+// ------------------------------------------------------------
+// 7. Them vao cuoi
+// ------------------------------------------------------------
+void addTail(CircularLinkedList &l, int x)
 {
     Node *p = createNode(x);
 
     // Danh sach rong
-    if (head == nullptr)
+    if (l.head == nullptr)
     {
-        head = tail = p;
-        p->next = head;
+        l.head = p;
+        l.tail = p;
+        p->next = p;            // tu tro vao chinh no
         return;
     }
 
-    p->next = head;
-    tail->next = p;
-    tail = p;
+    p->next = l.tail->next;     // p->next = head
+    l.tail->next = p;
+    l.tail = p;
 }
 
-// ============================================================
-// 8. THEM SAU NODE CO GIA TRI X
-// ============================================================
-
-bool addAfter(Node *&head, Node *&tail, int x, int value)
+// ------------------------------------------------------------
+// 8. Them sau Node co gia tri x
+// ------------------------------------------------------------
+bool addAfter(CircularLinkedList &l, int x, int value)
 {
-    Node *q = search(head, value);
+    Node *q = search(l, value);
 
     if (q == nullptr)
         return false;
@@ -180,161 +165,158 @@ bool addAfter(Node *&head, Node *&tail, int x, int value)
     p->next = q->next;
     q->next = p;
 
-    // q la Node cuoi
-    if (q == tail)
-        tail = p;
+    // Neu them sau tail thi cap nhat tail
+    if (q == l.tail)
+        l.tail = p;
 
     return true;
 }
 
-// ============================================================
-// 9. SUA NODE CO GIA TRI CU THANH GIA TRI MOI
-// ============================================================
-
-bool update(Node *head, int oldValue, int newValue)
+// ------------------------------------------------------------
+// 9. Sua Node co gia tri cu thanh gia tri moi
+// ------------------------------------------------------------
+bool update(const CircularLinkedList &l, int oldValue, int newValue)
 {
-    Node *p = search(head, oldValue);
+    Node *p = search(l, oldValue);
 
     if (p == nullptr)
         return false;
 
     p->info = newValue;
-
     return true;
 }
 
-// ============================================================
-// 10. XOA NODE DAU
-// ============================================================
-
-bool deleteHead(Node *&head, Node *&tail)
+// ------------------------------------------------------------
+// 10. Xoa dau
+// ------------------------------------------------------------
+bool deleteHead(CircularLinkedList &l)
 {
-    if (head == nullptr)
+    if (l.head == nullptr)
         return false;
 
-    Node *p = head;
+    Node *p = l.head;
 
     // Chi co 1 Node
-    if (head == tail)
+    if (l.head == l.tail)
     {
-        head = nullptr;
-        tail = nullptr;
-    }
-    else
-    {
-        head = head->next;
-        tail->next = head;
+        l.head = nullptr;
+        l.tail = nullptr;
+        delete p;
+        return true;
     }
 
+    l.head = l.head->next;
+    l.tail->next = l.head;
     delete p;
 
     return true;
 }
 
-// ============================================================
-// 11. XOA NODE CUOI
-// ============================================================
-
-bool deleteTail(Node *&head, Node *&tail)
+// ------------------------------------------------------------
+// 11. Xoa cuoi
+// ------------------------------------------------------------
+bool deleteTail(CircularLinkedList &l)
 {
-    if (head == nullptr)
+    if (l.head == nullptr)
         return false;
 
     // Chi co 1 Node
-    if (head == tail)
+    if (l.head == l.tail)
     {
-        delete head;
-        head = nullptr;
-        tail = nullptr;
+        delete l.head;
+        l.head = nullptr;
+        l.tail = nullptr;
         return true;
     }
 
-    // Tim Node truoc tail
-    Node *p = head;
+    // Tim node dung truoc tail
+    Node *p = l.head;
 
-    while (p->next != tail)
+    while (p->next != l.tail)
         p = p->next;
 
-    p->next = head;
-    delete tail;
-    tail = p;
+    Node *q = l.tail;
+
+    p->next = l.head;
+    l.tail = p;
+    delete q;
 
     return true;
 }
 
-// ============================================================
-// 12. XOA NODE DAU TIEN CO GIA TRI X
-// ============================================================
-
-bool deleteX(Node *&head, Node *&tail, int x)
+// ------------------------------------------------------------
+// 12. Xoa Node dau tien co gia tri x
+// ------------------------------------------------------------
+bool deleteX(CircularLinkedList &l, int x)
 {
-    if (head == nullptr)
+    if (l.head == nullptr)
         return false;
 
     // Xoa head
-    if (head->info == x)
-        return deleteHead(head, tail);
+    if (l.head->info == x)
+        return deleteHead(l);
 
-    Node *prev = head;
-    Node *p = head->next;
+    Node *prev = l.head;
+    Node *p = l.head->next;
 
-    while (p != head && p->info != x)
+    while (p != l.head && p->info != x)
     {
         prev = p;
         p = p->next;
     }
 
-    // Khong tim thay
-    if (p == head)
+    // Khong tim thay (da quay ve head)
+    if (p == l.head)
         return false;
 
     prev->next = p->next;
 
-    // Xoa tail
-    if (p == tail)
-        tail = prev;
+    // Neu xoa tail thi cap nhat tail
+    if (p == l.tail)
+        l.tail = prev;
 
     delete p;
 
     return true;
 }
 
-// ============================================================
-// 13. XOA TAT CA NODE CO GIA TRI X
-// ============================================================
-
-int deleteAllX(Node *&head, Node *&tail, int x)
+// ------------------------------------------------------------
+// 13. Xoa tat ca Node co gia tri x
+// ------------------------------------------------------------
+int deleteAllX(CircularLinkedList &l, int x)
 {
+    if (l.head == nullptr)
+        return 0;
+
     int count = 0;
 
-    while (head != nullptr && head->info == x)
+    // Xoa cac node o dau co gia tri x
+    while (l.head != nullptr && l.head->info == x)
     {
-        deleteHead(head, tail);
+        deleteHead(l);
         count++;
     }
 
-    if (head == nullptr)
+    if (l.head == nullptr)
         return count;
 
-    Node *prev = head;
-    Node *p = head->next;
+    Node *prev = l.head;
+    Node *p = l.head->next;
 
-    while (p != head)
+    while (p != l.head)
     {
         if (p->info == x)
         {
-            if (p == tail)
-            {
-                prev->next = head;
-                delete p;
-                tail = prev;
-                count++;
-                break;
-            }
+            Node *next = p->next;
 
-            prev->next = p->next;
+            prev->next = next;
+
+            // Neu xoa tail thi cap nhat tail
+            if (p == l.tail)
+                l.tail = prev;
+
             delete p;
-            p = prev->next;
+            p = next;
             count++;
         }
         else
@@ -347,198 +329,76 @@ int deleteAllX(Node *&head, Node *&tail, int x)
     return count;
 }
 
-// ============================================================
-// 14. XOA TOAN BO DANH SACH
-// ============================================================
-
-void clear(Node *&head, Node *&tail)
+// ------------------------------------------------------------
+// 14. Xoa toan bo danh sach
+// ------------------------------------------------------------
+void clear(CircularLinkedList &l)
 {
-    while (head != nullptr)
-        deleteHead(head, tail);
+    while (l.head != nullptr)
+        deleteHead(l);
 }
 
 // ============================================================
-// MENU
-// ============================================================
-
-void menu()
-{
-    cout << "\n========== DANH SACH LIEN KET VONG ==========\n";
-    cout << "1. Them dau\n";
-    cout << "2. Them cuoi\n";
-    cout << "3. Them sau Node\n";
-    cout << "4. Duyet danh sach\n";
-    cout << "5. Tim kiem\n";
-    cout << "6. Sua Node\n";
-    cout << "7. Xoa dau\n";
-    cout << "8. Xoa cuoi\n";
-    cout << "9. Xoa Node theo gia tri\n";
-    cout << "10. Xoa tat ca Node theo gia tri\n";
-    cout << "11. Dem Node\n";
-    cout << "12. Xoa toan bo\n";
-    cout << "0. Thoat\n";
-    cout << "=============================================\n";
-    cout << "Chon: ";
-}
-
-// ============================================================
-// MAIN
+// MAIN DEMO
 // ============================================================
 
 int main()
 {
-    Node *head, *tail;
-    init(head, tail);
+    CircularLinkedList l;
+    init(l);
 
-    int choice;
+    // Tao danh sach
+    addTail(l, 10);
+    addTail(l, 20);
+    addTail(l, 30);
+    addTail(l, 40);
 
-    do
-    {
-        menu();
-        cin >> choice;
+    cout << "Danh sach ban dau: ";
+    output(l);
 
-        switch (choice)
-        {
-        case 1:
-        {
-            int x;
-            cout << "Nhap x: ";
-            cin >> x;
+    // Kiem tra tinh chat vong
+    if (l.tail != nullptr && l.tail->next == l.head)
+        cout << "Tinh chat vong: OK (tail->next = head)" << endl;
 
-            addHead(head, tail, x);
-            cout << "Them dau thanh cong!\n";
-            break;
-        }
+    // Them dau
+    addHead(l, 5);
 
-        case 2:
-        {
-            int x;
-            cout << "Nhap x: ";
-            cin >> x;
+    // Them cuoi
+    addTail(l, 50);
 
-            addTail(head, tail, x);
-            cout << "Them cuoi thanh cong!\n";
-            break;
-        }
+    // Them sau Node 20
+    addAfter(l, 25, 20);
 
-        case 3:
-        {
-            int x, value;
+    // Sua
+    update(l, 30, 35);
 
-            cout << "Nhap x can them: ";
-            cin >> x;
+    cout << "Sau them/sua:      ";
+    output(l);
 
-            cout << "Them sau gia tri: ";
-            cin >> value;
+    // Tim kiem
+    Node *p = search(l, 25);
+    if (p != nullptr)
+        cout << "Tim thay: " << p->info << endl;
 
-            if (addAfter(head, tail, x, value))
-                cout << "Them thanh cong!\n";
-            else
-                cout << "Khong tim thay Node!\n";
+    // Xoa dau
+    deleteHead(l);
 
-            break;
-        }
+    // Xoa cuoi
+    deleteTail(l);
 
-        case 4:
-            cout << "Danh sach: ";
-            output(head);
-            break;
+    // Xoa Node co gia tri 25
+    deleteX(l, 25);
 
-        case 5:
-        {
-            int x;
-            cout << "Nhap x can tim: ";
-            cin >> x;
+    cout << "Sau khi xoa:       ";
+    output(l);
 
-            Node *p = search(head, x);
+    cout << "So Node: " << countNode(l) << endl;
 
-            if (p != nullptr)
-                cout << "Tim thay: " << p->info << endl;
-            else
-                cout << "Khong tim thay!\n";
+    // Xoa toan bo
+    clear(l);
 
-            break;
-        }
-
-        case 6:
-        {
-            int oldValue, newValue;
-
-            cout << "Gia tri cu: ";
-            cin >> oldValue;
-
-            cout << "Gia tri moi: ";
-            cin >> newValue;
-
-            if (update(head, oldValue, newValue))
-                cout << "Sua thanh cong!\n";
-            else
-                cout << "Khong tim thay Node!\n";
-
-            break;
-        }
-
-        case 7:
-            if (deleteHead(head, tail))
-                cout << "Xoa dau thanh cong!\n";
-            else
-                cout << "Danh sach rong!\n";
-
-            break;
-
-        case 8:
-            if (deleteTail(head, tail))
-                cout << "Xoa cuoi thanh cong!\n";
-            else
-                cout << "Danh sach rong!\n";
-
-            break;
-
-        case 9:
-        {
-            int x;
-            cout << "Nhap gia tri can xoa: ";
-            cin >> x;
-
-            if (deleteX(head, tail, x))
-                cout << "Xoa thanh cong!\n";
-            else
-                cout << "Khong tim thay Node!\n";
-
-            break;
-        }
-
-        case 10:
-        {
-            int x;
-            cout << "Nhap gia tri can xoa: ";
-            cin >> x;
-
-            int count = deleteAllX(head, tail, x);
-
-            cout << "Da xoa " << count << " Node.\n";
-            break;
-        }
-
-        case 11:
-            cout << "So Node: " << countNode(head) << endl;
-            break;
-
-        case 12:
-            clear(head, tail);
-            cout << "Da xoa toan bo danh sach!\n";
-            break;
-
-        case 0:
-            cout << "Ket thuc chuong trinh.\n";
-            break;
-
-        default:
-            cout << "Lua chon khong hop le!\n";
-        }
-
-    }
-    while (choice != 0);
+    cout << "Sau clear:         ";
+    output(l);
 
     return 0;
 }

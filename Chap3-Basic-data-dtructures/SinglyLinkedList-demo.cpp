@@ -6,6 +6,9 @@ using namespace std;
 // Cac thao tac: khoi tao, tao node, them dau, them cuoi,
 // them sau node, tim kiem, sua, xoa dau, xoa cuoi,
 // xoa theo gia tri, duyet, xoa toan bo.
+//
+// Su dung struct SinglyLinkedList de quan ly head va tail,
+// giup viec truyen tham so de dang hon.
 // ============================================================
 
 struct Node
@@ -14,12 +17,20 @@ struct Node
     Node *next;
 };
 
+// Quan ly danh sach lien ket don
+struct SinglyLinkedList
+{
+    Node *head;
+    Node *tail;
+};
+
 // ------------------------------------------------------------
 // 1. Khoi tao
 // ------------------------------------------------------------
-void init(Node *&head)
+void init(SinglyLinkedList &l)
 {
-    head = nullptr;
+    l.head = nullptr;
+    l.tail = nullptr;
 }
 
 // ------------------------------------------------------------
@@ -36,9 +47,9 @@ Node* createNode(int x)
 // ------------------------------------------------------------
 // 3. Duyet danh sach
 // ------------------------------------------------------------
-void output(Node *head)
+void output(const SinglyLinkedList &l)
 {
-    Node *p = head;
+    Node *p = l.head;
 
     while (p != nullptr)
     {
@@ -52,11 +63,11 @@ void output(Node *head)
 // ------------------------------------------------------------
 // 4. Dem so Node
 // ------------------------------------------------------------
-int countNode(Node *head)
+int countNode(const SinglyLinkedList &l)
 {
     int count = 0;
 
-    for (Node *p = head; p != nullptr; p = p->next)
+    for (Node *p = l.head; p != nullptr; p = p->next)
         count++;
 
     return count;
@@ -65,9 +76,9 @@ int countNode(Node *head)
 // ------------------------------------------------------------
 // 5. Tim Node co gia tri x
 // ------------------------------------------------------------
-Node* search(Node *head, int x)
+Node* search(const SinglyLinkedList &l, int x)
 {
-    Node *p = head;
+    Node *p = l.head;
 
     while (p != nullptr && p->info != x)
         p = p->next;
@@ -78,41 +89,41 @@ Node* search(Node *head, int x)
 // ------------------------------------------------------------
 // 6. Them vao dau
 // ------------------------------------------------------------
-void addHead(Node *&head, int x)
+void addHead(SinglyLinkedList &l, int x)
 {
     Node *p = createNode(x);
 
-    p->next = head;
-    head = p;
+    p->next = l.head;
+    l.head = p;
+
+    if (l.tail == nullptr)
+        l.tail = p;
 }
 
 // ------------------------------------------------------------
 // 7. Them vao cuoi
 // ------------------------------------------------------------
-void addTail(Node *&head, int x)
+void addTail(SinglyLinkedList &l, int x)
 {
     Node *p = createNode(x);
 
-    if (head == nullptr)
+    if (l.tail == nullptr)
     {
-        head = p;
+        l.head = p;
+        l.tail = p;
         return;
     }
 
-    Node *q = head;
-
-    while (q->next != nullptr)
-        q = q->next;
-
-    q->next = p;
+    l.tail->next = p;
+    l.tail = p;
 }
 
 // ------------------------------------------------------------
 // 8. Them sau Node co gia tri x
 // ------------------------------------------------------------
-bool addAfter(Node *head, int x, int value)
+bool addAfter(SinglyLinkedList &l, int x, int value)
 {
-    Node *q = search(head, value);
+    Node *q = search(l, value);
 
     if (q == nullptr)
         return false;
@@ -122,15 +133,19 @@ bool addAfter(Node *head, int x, int value)
     p->next = q->next;
     q->next = p;
 
+    // Neu them sau tail thi cap nhat tail
+    if (q == l.tail)
+        l.tail = p;
+
     return true;
 }
 
 // ------------------------------------------------------------
 // 9. Sua Node co gia tri cu thanh gia tri moi
 // ------------------------------------------------------------
-bool update(Node *head, int oldValue, int newValue)
+bool update(const SinglyLinkedList &l, int oldValue, int newValue)
 {
-    Node *p = search(head, oldValue);
+    Node *p = search(l, oldValue);
 
     if (p == nullptr)
         return false;
@@ -142,13 +157,16 @@ bool update(Node *head, int oldValue, int newValue)
 // ------------------------------------------------------------
 // 10. Xoa dau
 // ------------------------------------------------------------
-bool deleteHead(Node *&head)
+bool deleteHead(SinglyLinkedList &l)
 {
-    if (head == nullptr)
+    if (l.head == nullptr)
         return false;
 
-    Node *p = head;
-    head = head->next;
+    Node *p = l.head;
+    l.head = l.head->next;
+
+    if (l.head == nullptr)
+        l.tail = nullptr;
 
     delete p;
     return true;
@@ -157,30 +175,32 @@ bool deleteHead(Node *&head)
 // ------------------------------------------------------------
 // 11. Xoa cuoi
 // ------------------------------------------------------------
-bool deleteTail(Node *&head)
+bool deleteTail(SinglyLinkedList &l)
 {
-    if (head == nullptr)
+    if (l.head == nullptr)
         return false;
 
     // Chi co 1 Node
-    if (head->next == nullptr)
+    if (l.head == l.tail)
     {
-        delete head;
-        head = nullptr;
+        delete l.head;
+        l.head = nullptr;
+        l.tail = nullptr;
         return true;
     }
 
     Node *prev = nullptr;
-    Node *tail = head;
+    Node *p = l.head;
 
-    while (tail->next != nullptr)
+    while (p->next != nullptr)
     {
-        prev = tail;
-        tail = tail->next;
+        prev = p;
+        p = p->next;
     }
 
     prev->next = nullptr;
-    delete tail;
+    l.tail = prev;
+    delete p;
 
     return true;
 }
@@ -188,17 +208,17 @@ bool deleteTail(Node *&head)
 // ------------------------------------------------------------
 // 12. Xoa Node dau tien co gia tri x
 // ------------------------------------------------------------
-bool deleteX(Node *&head, int x)
+bool deleteX(SinglyLinkedList &l, int x)
 {
-    if (head == nullptr)
+    if (l.head == nullptr)
         return false;
 
     // Xoa head
-    if (head->info == x)
-        return deleteHead(head);
+    if (l.head->info == x)
+        return deleteHead(l);
 
-    Node *prev = head;
-    Node *p = head->next;
+    Node *prev = l.head;
+    Node *p = l.head->next;
 
     while (p != nullptr && p->info != x)
     {
@@ -210,6 +230,11 @@ bool deleteX(Node *&head, int x)
         return false;
 
     prev->next = p->next;
+
+    // Neu xoa tail thi cap nhat tail
+    if (p == l.tail)
+        l.tail = prev;
+
     delete p;
 
     return true;
@@ -218,27 +243,32 @@ bool deleteX(Node *&head, int x)
 // ------------------------------------------------------------
 // 13. Xoa tat ca Node co gia tri x
 // ------------------------------------------------------------
-int deleteAllX(Node *&head, int x)
+int deleteAllX(SinglyLinkedList &l, int x)
 {
     int count = 0;
 
-    while (head != nullptr && head->info == x)
+    while (l.head != nullptr && l.head->info == x)
     {
-        deleteHead(head);
+        deleteHead(l);
         count++;
     }
 
-    if (head == nullptr)
+    if (l.head == nullptr)
         return count;
 
-    Node *prev = head;
-    Node *p = head->next;
+    Node *prev = l.head;
+    Node *p = l.head->next;
 
     while (p != nullptr)
     {
         if (p->info == x)
         {
             prev->next = p->next;
+
+            // Neu xoa tail thi cap nhat tail
+            if (p == l.tail)
+                l.tail = prev;
+
             delete p;
             p = prev->next;
             count++;
@@ -256,10 +286,10 @@ int deleteAllX(Node *&head, int x)
 // ------------------------------------------------------------
 // 14. Xoa toan bo danh sach
 // ------------------------------------------------------------
-void clear(Node *&head)
+void clear(SinglyLinkedList &l)
 {
-    while (head != nullptr)
-        deleteHead(head);
+    while (l.head != nullptr)
+        deleteHead(l);
 }
 
 // ============================================================
@@ -268,57 +298,57 @@ void clear(Node *&head)
 
 int main()
 {
-    Node *head;
-    init(head);
+    SinglyLinkedList l;
+    init(l);
 
     // Tao danh sach
-    addTail(head, 10);
-    addTail(head, 20);
-    addTail(head, 30);
-    addTail(head, 40);
+    addTail(l, 10);
+    addTail(l, 20);
+    addTail(l, 30);
+    addTail(l, 40);
 
     cout << "Danh sach ban dau: ";
-    output(head);
+    output(l);
 
     // Them dau
-    addHead(head, 5);
+    addHead(l, 5);
 
     // Them cuoi
-    addTail(head, 50);
+    addTail(l, 50);
 
     // Them sau Node 20
-    addAfter(head, 25, 20);
+    addAfter(l, 25, 20);
 
     // Sua
-    update(head, 30, 35);
+    update(l, 30, 35);
 
     cout << "Sau them/sua:      ";
-    output(head);
+    output(l);
 
     // Tim kiem
-    Node *p = search(head, 25);
+    Node *p = search(l, 25);
     if (p != nullptr)
         cout << "Tim thay: " << p->info << endl;
 
     // Xoa dau
-    deleteHead(head);
+    deleteHead(l);
 
     // Xoa cuoi
-    deleteTail(head);
+    deleteTail(l);
 
     // Xoa Node co gia tri 25
-    deleteX(head, 25);
+    deleteX(l, 25);
 
     cout << "Sau khi xoa:       ";
-    output(head);
+    output(l);
 
-    cout << "So Node: " << countNode(head) << endl;
+    cout << "So Node: " << countNode(l) << endl;
 
     // Xoa toan bo
-    clear(head);
+    clear(l);
 
     cout << "Sau clear:         ";
-    output(head);
+    output(l);
 
     return 0;
 }
